@@ -33,7 +33,7 @@ class AwardCoService {
         apiKey: this.awardCoApiKey,
         email: event.recipient.slackEmail,
         rewardedBy: event.sender.slackEmail,
-        amount: event.amount,
+        // amount: event.amount, // this is used for $ cash dollars and is not currently supported due to lack of `/budget` endpoint
         note,
       }));
     } catch (e) {
