@@ -208,10 +208,10 @@ module.exports = function (robot) {
   async function handleAwardCoSent(e) {
     if (e.response.success === true) {
       robot.logger.debug('awardCo point was sent and we caught the event.');
-      const awardCoMessage = `We sent a ${awardName} for ${e.response.result.amount_with_currency} to <@${e.event.recipient.slackId}>.`;
+      const awardCoMessage = `We sent a ${awardName} to <@${e.event.recipient.slackId}>.`;
       const user = await userService.getUser(e.event.sender.slackId);
       if (user.awardCoDM === true || user.awardCoDM === undefined) {
-        let dm = `We sent <@${e.event.recipient.slackId}> ${e.response.result.amount_with_currency} via ${awardName}. You now have ${e.response.result.giver.giving_balance_with_currency} left.`;
+        let dm = `We sent <@${e.event.recipient.slackId}> an award via ${awardName}.`;
         /* if ((!user.awardCoAmount || e.event.amount === 1) && Helpers.rngBoolean()) {
           dm += `\n\nDid you know you could change the amount you send per ${robot.name} Point?\n Just DM @${robot.name} \`change my ${awardName} points setting\`,`;
           dm += '\nI will ask you about how many points you\'d like to send per `++` you respond with a number.\n :tada: Bingo Bango Bongo, you\'re all set.';
