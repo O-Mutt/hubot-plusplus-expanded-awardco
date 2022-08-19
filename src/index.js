@@ -36,7 +36,7 @@ module.exports = function (robot) {
   robot.on('plus-plus', handlePlusPlus);
   robot.on('plus-plus-awardCo-sent', handleAwardCoSent);
   robot.respond(/.*change.*awardCo\s?(?:integration)?\s?(?:configuration|config|response|setting|settings).*/ig, changeAwardCoConfig);
-  robot.respond(/.*change.*awardCo.*(points|amount).*/ig, changeAwardCoAmount);
+  // robot.respond(/.*change.*awardCo.*(points|amount).*/ig, changeAwardCoAmount);
   robot.respond(/.*toggle dm about awardCo.*/ig, toggleAwardCoDM);
 
   async function changeAwardCoConfig(msg) {
@@ -212,10 +212,10 @@ module.exports = function (robot) {
       const user = await userService.getUser(e.event.sender.slackId);
       if (user.awardCoDM === true || user.awardCoDM === undefined) {
         let dm = `We sent <@${e.event.recipient.slackId}> ${e.response.result.amount_with_currency} via ${awardName}. You now have ${e.response.result.giver.giving_balance_with_currency} left.`;
-        if ((!user.awardCoAmount || e.event.amount === 1) && Helpers.rngBoolean()) {
+        /* if ((!user.awardCoAmount || e.event.amount === 1) && Helpers.rngBoolean()) {
           dm += `\n\nDid you know you could change the amount you send per ${robot.name} Point?\n Just DM @${robot.name} \`change my ${awardName} points setting\`,`;
           dm += '\nI will ask you about how many points you\'d like to send per `++` you respond with a number.\n :tada: Bingo Bango Bongo, you\'re all set.';
-        }
+        } */
         if (user.awardCoDM === undefined && Helpers.rngBoolean()) {
           dm += `\n\nDon't like these DMs about ${awardName}?\nJust DM @${robot.name} \`toggle dm about ${awardName}\` and we will turn off this DM.`;
         }
@@ -223,7 +223,7 @@ module.exports = function (robot) {
       }
       e.event.msg.send(awardCoMessage);
     } else {
-      robot.logger.error('there was an issue sending a award', e.response.message);
+      robot.logger.error('there was an issue sending a award', e.response);
       e.event.msg.send(`Sorry, there was an issue sending your ${awardName} award: ${e.response.message}`);
     }
   }
