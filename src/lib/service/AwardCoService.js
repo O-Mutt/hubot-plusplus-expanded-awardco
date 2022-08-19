@@ -30,7 +30,7 @@ class AwardCoService {
     let data;
     try {
       ({ data } = await this.axios.post('/reward', {
-        apiKey: this.awardCoApiKey,
+        apiKey: this.apiKey,
         email: event.recipient.slackEmail,
         rewardedBy: event.sender.slackEmail,
         // amount: event.amount, // this is used for $ cash dollars and is not currently supported due to lack of `/budget` endpoint
