@@ -4,6 +4,7 @@ function createProcVars(env) {
   procVars.awardCoApiKey = env.AWARDCO_API_KEY;
   procVars.awardCoUri = env.AWARDCO_URI || 'https://api.awardco.com/api';
   procVars.awardCoDefaultNote = env.AWARDCO_DEFAULT_NOTE;
+  procVars.awardCoName = env.AWARDCO_WHITELABEL_NAME || 'Award Co';
   return procVars;
 }
 

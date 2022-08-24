@@ -27,7 +27,7 @@ module.exports = function (robot) {
   const userService = new UserService(robot, procVars);
   const awardCoService = new AwardCoService(robot, procVars);
 
-  const awardName = procVars.awardCoName || 'Award Co';
+  const awardName = procVars.awardCoName;
   if (!procVars.awardCoApiKey) {
     robot.logger.error('hubot-plusplus-expanded-awardCo is installed but the awardCo api key is not configured');
     return;
