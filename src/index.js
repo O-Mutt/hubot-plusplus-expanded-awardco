@@ -55,9 +55,9 @@ module.exports = function (robot) {
     }
 
     const dialog = switchBoard.startDialog(msg);
-    let choiceMsg = `${robot.name} is setup to allow you to also send a ${awardName} point when you send a ${robot.name} point! `;
+    let choiceMsg = `${robot.name} is setup to allow you to also send a(n) ${awardName} point when you send a ${robot.name} point! `;
     choiceMsg += `There are three options how you can setup ${robot.name} to do this:`;
-    choiceMsg += `\n• Always send a ${awardName} when you send a ${robot.name} point.\n • Prompt every time to send a ${robot.name} point to include a ${awardName} point.\n • Never include a ${awardName} point with ${robot.name} points.`;
+    choiceMsg += `\n• Always send a(n) ${awardName} when you send a ${robot.name} point.\n • Prompt every time to send a ${robot.name} point to include a(n) ${awardName} point.\n • Never include a(n) ${awardName} point with ${robot.name} points.`;
     choiceMsg += `\n\nHow would you like to configure ${robot.name}? (You can always change this later by DMing me \`change my ${awardName} settings\`)\n[ \`Always\` | \`Prompt\` | \`Never\` ]`;
     robot.messageRoom(user.slackId, choiceMsg);
     dialog.addChoice(/always/i, async () => {
@@ -160,9 +160,9 @@ module.exports = function (robot) {
         robot.messageRoom(event.sender.slackId, 'We didn\'t receive your response in time. Please try again.');
       };
       // check with user how they want to handle hubot points/awardCo awards
-      let choiceMsg = `${robot.name} is setup to allow you to also send a ${awardName} point when you send a ${robot.name} point! `;
+      let choiceMsg = `${robot.name} is setup to allow you to also send a(n) ${awardName} point when you send a ${robot.name} point! `;
       choiceMsg += `There are three options how you can setup ${robot.name} to do this:`;
-      choiceMsg += `\n• Always send a ${awardName} when you send a ${robot.name} point.\n • Prompt every time to send a ${robot.name} point to include a ${awardName} point.\n • Never include a ${awardName} point with ${robot.name} points.`;
+      choiceMsg += `\n• Always send a(n) ${awardName} when you send a ${robot.name} point.\n • Prompt every time to send a ${robot.name} point to include a(n) ${awardName} point.\n • Never include a(n) ${awardName} point with ${robot.name} points.`;
       choiceMsg += `\n\nHow would you like to configure ${robot.name}? (You can always change this later by DMing me \`change my ${awardName} settings\`)\n[ \`Always\` | \`Prompt\` | \`Never\` ]`;
       robot.messageRoom(event.sender.slackId, choiceMsg);
       dialog.addChoice(/always/i, async () => {
@@ -172,7 +172,7 @@ module.exports = function (robot) {
       });
       dialog.addChoice(/prompt/i, async () => {
         await userService.setAwardCoResponse(event.sender, AwardCoResponse.PROMPT);
-        robot.messageRoom(event.sender.slackId, `In that case, do you want to send <@${event.recipient.slackId}> a ${awardName} worth ${event.amount}?\n[ \`Yes\` | \`No\` ]`);
+        robot.messageRoom(event.sender.slackId, `In that case, do you want to send <@${event.recipient.slackId}> a(n) ${awardName} worth ${event.amount}?\n[ \`Yes\` | \`No\` ]`);
         dialog.addChoice(/yes/i, async () => {
           const response = await awardCoService.sendAward(event);
           robot.emit('plus-plus-awardCo-sent', { response, event });
@@ -210,7 +210,7 @@ module.exports = function (robot) {
   async function handleAwardCoSent(e) {
     if (e.response.success === true) {
       robot.logger.debug('awardCo point was sent and we caught the event.');
-      const awardCoMessage = `We sent a ${awardName} to <@${e.event.recipient.slackId}>.`;
+      const awardCoMessage = `We sent a(n) ${awardName} to <@${e.event.recipient.slackId}>.`;
       const user = await userService.getUser(e.event.sender.slackId);
       if (user.awardCoDM === true || user.awardCoDM === undefined) {
         let dm = `We sent <@${e.event.recipient.slackId}> an award via ${awardName}.`;

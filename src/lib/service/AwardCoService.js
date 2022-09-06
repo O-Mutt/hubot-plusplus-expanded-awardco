@@ -11,7 +11,7 @@ class AwardCoService {
         'Content-Type': 'application/json',
       },
     });
-    this.defaultNote = procVars.awardCoDefaultNote || `award given through ${this.robot.name}`;
+    this.defaultNote = procVars.awardCoDefaultNote || `${procVars.awardCoName} given through ${this.robot.name}`;
   }
 
   /**
