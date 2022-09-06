@@ -35,9 +35,11 @@ module.exports = function (robot) {
 
   robot.on('plus-plus', handlePlusPlus);
   robot.on('plus-plus-awardCo-sent', handleAwardCoSent);
-  robot.respond(/.*change.*awardCo\s?(?:integration)?\s?(?:configuration|config|response|setting|settings).*/ig, changeAwardCoConfig);
+  const changeSettingsRegExp = new RegExp(`.*change.*${awardName}\\s?(?:integration)?\\s?(?:configuration|config|response|setting|settings).*`, 'ig');
+  const dmSettingRegExp = new RegExp(`.*toggle dm about ${awardName}.*`, 'ig');
+  robot.respond(changeSettingsRegExp, changeAwardCoConfig);
   // robot.respond(/.*change.*awardCo.*(points|amount).*/ig, changeAwardCoAmount);
-  robot.respond(/.*toggle dm about awardCo.*/ig, toggleAwardCoDM);
+  robot.respond(dmSettingRegExp, toggleAwardCoDM);
 
   async function changeAwardCoConfig(msg) {
     const switchBoard = new Conversation(robot);
