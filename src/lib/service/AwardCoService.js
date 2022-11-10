@@ -24,7 +24,7 @@ class AwardCoService {
     let note = this.defaultNote;
     if (event.reason) {
       const buff = new Buffer.from(event.reason, 'base64');
-      note = buff.toString('UTF-8');
+      note = buff.toString('UTF-8') + " (via ${this.robot.name})";
     }
 
     let data;
