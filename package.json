@@ -1,11 +1,10 @@
 {
   "name": "hubot-plusplus-expanded-awardco",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "^16.x.x",
-    "npm": "^8.x.x"
+    "node": "^18.x.x"
   },
   "scripts": {
     "test": "jest --watchAll=false --detectOpenHandles --forceExit",
