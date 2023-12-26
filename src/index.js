@@ -22,7 +22,7 @@ const AwardCoService = require('./lib/service/AwardCoService');
 const Helpers = require('./lib/helpers');
 
 module.exports = function (robot) {
-  const procVars = Helpers.createProcVars(process.env);
+  const procVars = Helpers.createProcVars(robot.name);
 
   const userService = new UserService(robot, procVars);
   const awardCoService = new AwardCoService(robot, procVars);
@@ -30,7 +30,7 @@ module.exports = function (robot) {
   const awardName = procVars.awardCoName;
   if (!procVars.awardCoApiKey) {
     robot.logger.error(
-      'hubot-plusplus-expanded-awardCo is installed but the awardCo api key is not configured',
+      'hubot-plusplus-expanded-awardCo is installed but the awardCo api key is not configured'
     );
     return;
   }
@@ -39,7 +39,7 @@ module.exports = function (robot) {
   robot.on('plus-plus-awardCo-sent', handleAwardCoSent);
   const changeSettingsRegExp = new RegExp(
     `.*change.*${awardName}\\s?(?:integration)?\\s?(?:configuration|config|response|setting|settings).*`,
-    'ig',
+    'ig'
   );
   const dmSettingRegExp = new RegExp(`.*toggle dm about ${awardName}.*`, 'ig');
   robot.respond(changeSettingsRegExp, changeAwardCoConfig);
@@ -56,7 +56,7 @@ module.exports = function (robot) {
     const user = await userService.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
-        "I'm sorry we could not find your user account. Please contact an admin",
+        "I'm sorry we could not find your user account. Please contact an admin"
       );
       return;
     }
@@ -70,19 +70,19 @@ module.exports = function (robot) {
     dialog.addChoice(/always/i, async () => {
       await userService.setAwardCoResponse(user, AwardCoResponse.ALWAYS);
       msg.reply(
-        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`,
+        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`
       );
     });
     dialog.addChoice(/prompt/i, async () => {
       await userService.setAwardCoResponse(user, AwardCoResponse.PROMPT);
       msg.reply(
-        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`,
+        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`
       );
     });
     dialog.addChoice(/never/i, async () => {
       await userService.setAwardCoResponse(user, AwardCoResponse.NEVER);
       msg.reply(
-        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`,
+        `Thank you! We've updated your ${robot.name}->${awardName} integration settings`
       );
     });
   }
@@ -97,7 +97,7 @@ module.exports = function (robot) {
     const user = await userService.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
-        "I'm sorry we could not find your user account. Please contact an admin",
+        "I'm sorry we could not find your user account. Please contact an admin"
       );
       return;
     }
@@ -112,7 +112,7 @@ module.exports = function (robot) {
       const amount = parseInt(msg2.match.groups.amount || 1, 10);
       await userService.setAwardCoAmount(user, amount);
       msg.reply(
-        `Thank you! We've updated your ${robot.name}->${awardName} amount to *${amount}*`,
+        `Thank you! We've updated your ${robot.name}->${awardName} amount to *${amount}*`
       );
     });
   }
@@ -126,7 +126,7 @@ module.exports = function (robot) {
     let user = await userService.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
-        "I'm sorry we could not find your user account. Please contact an admin",
+        "I'm sorry we could not find your user account. Please contact an admin"
       );
       return;
     }
@@ -138,7 +138,7 @@ module.exports = function (robot) {
         user.awardCoDM
           ? `${robot.name} will DM you again.`
           : `${robot.name} won't DM you any more.`
-      }`,
+      }`
     );
   }
   /**
@@ -159,8 +159,8 @@ module.exports = function (robot) {
     if (events.direction !== '++' && events.direction !== '+') {
       robot.logger.debug(
         `Points were taken away, not given. We won't talk to ${awardName} for this one.\n${JSON.stringify(
-          events.direction,
-        )}`,
+          events.direction
+        )}`
       );
       return;
     }
@@ -176,7 +176,7 @@ module.exports = function (robot) {
     }
 
     const { awardCoAmount = 1 } = await userService.getUser(
-      events.sender.slackId,
+      events.sender.slackId
     );
     events.amount = awardCoAmount;
     const msg = {
@@ -192,7 +192,7 @@ module.exports = function (robot) {
       dialog.dialogTimeout = () => {
         robot.messageRoom(
           events.sender.slackId,
-          "We didn't receive your response in time. Please try again.",
+          "We didn't receive your response in time. Please try again."
         );
       };
       // check with user how they want to handle hubot points/awardCo awards
@@ -204,7 +204,7 @@ module.exports = function (robot) {
       dialog.addChoice(/always/i, async () => {
         await userService.setAwardCoResponse(
           events.sender,
-          AwardCoResponse.ALWAYS,
+          AwardCoResponse.ALWAYS
         );
         const awardResponses = await awardCoService.sendAwards(events);
         robot.emit('plus-plus-awardCo-sent', awardResponses);
@@ -212,7 +212,7 @@ module.exports = function (robot) {
       dialog.addChoice(/prompt/i, async () => {
         await userService.setAwardCoResponse(
           events.sender,
-          AwardCoResponse.PROMPT,
+          AwardCoResponse.PROMPT
         );
         robot.messageRoom(
           events.sender.slackId,
@@ -220,7 +220,7 @@ module.exports = function (robot) {
             .map((e) => e.recipient.slackId)
             .join('>, <@')}> a(n) ${awardName} worth ${
             events.amount
-          }?\n[ \`Yes\` | \`No\` ]`,
+          }?\n[ \`Yes\` | \`No\` ]`
         );
         dialog.addChoice(/yes/i, async () => {
           const awardResponses = await awardCoService.sendAwards(events);
@@ -233,11 +233,11 @@ module.exports = function (robot) {
       dialog.addChoice(/never/i, async () => {
         await userService.setAwardCoResponse(
           events.sender,
-          AwardCoResponse.NEVER,
+          AwardCoResponse.NEVER
         );
         robot.messageRoom(
           events.sender.slackId,
-          'Alright! No worries. If you ever change your mind we can change your mind just let me know (DM me `change my awardCo settings`)!',
+          'Alright! No worries. If you ever change your mind we can change your mind just let me know (DM me `change my awardCo settings`)!'
         );
       });
       return;
@@ -251,12 +251,12 @@ module.exports = function (robot) {
       dialog.dialogTimeout = () => {
         robot.messageRoom(
           events.sender.slackId,
-          "We didn't receive your response in time. Please try again.",
+          "We didn't receive your response in time. Please try again."
         );
       };
       robot.messageRoom(
         events.sender.slackId,
-        `You just gave <@${events.recipient.slackId}> a ${robot.name} point and ${awardName} is enabled, would you like to send them ${events.amount} point(s) on ${awardName} as well?\n[ \`Yes\` | \`No\` ]`,
+        `You just gave <@${events.recipient.slackId}> a ${robot.name} point and ${awardName} is enabled, would you like to send them ${events.amount} point(s) on ${awardName} as well?\n[ \`Yes\` | \`No\` ]`
       );
       dialog.addChoice(/yes/i, async () => {
         const awardResponses = await awardCoService.sendAwards(events);
@@ -274,7 +274,7 @@ module.exports = function (robot) {
       if (ar.response.success === true) {
         robot.logger.debug('awardCo point was sent and we caught the event.');
         messages.push(
-          `We sent a(n) ${awardName} to <@${ar.event.recipient.slackId}>.`,
+          `We sent a(n) ${awardName} to <@${ar.event.recipient.slackId}>.`
         );
         const user = await userService.getUser(ar.event.sender.slackId);
         if (user.awardCoDM === true || user.awardCoDM === undefined) {
@@ -291,7 +291,7 @@ module.exports = function (robot) {
       } else {
         robot.logger.error('there was an issue sending a award', ar.response);
         messages.push(
-          `Sorry, there was an issue sending your ${awardName} award: ${ar.response.message}`,
+          `Sorry, there was an issue sending your ${awardName} award: ${ar.response.message}`
         );
       }
     }

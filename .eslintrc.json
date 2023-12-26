@@ -1,37 +1,40 @@
 {
-    "env": {
-        "browser": true,
-        "commonjs": true,
-        "es6": true,
-        "jest": true
-    },
-    "extends": [
-        "airbnb-base",
-        "plugin:jest/recommended"
-    ],
-    "globals": {
-        "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly"
-    },
-    "parserOptions": {
-        "ecmaVersion": 2018
-    },
-    "rules": {
-        "max-len": "off",
-        "func-names": [ "off" ],
-        "prefer-arrow-callback": "off",
-        "new-cap": "off",
-        "no-unused-vars": "warn",
-        "no-await-in-loop": "off",
-        "no-restricted-syntax": "off",
-        "no-param-reassign": "off",
-        "no-plusplus": "off",
-        "no-else-return": "off",
-        "jest/no-setup-in-describe": "off",
-        "no-underscore-dangle": "off",
-        "no-use-before-define": "off"
-    },
-    "plugins": [
-        "jest"
-    ]
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true
+  },
+  "extends": ["airbnb-base"],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "rules": {
+    "max-len": "warn",
+    "prefer-arrow-callback": "off",
+    "no-restricted-syntax": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-else-return": "off",
+    "no-underscore-dangle": "off",
+    "no-use-before-define": "off"
+  },
+  "overrides": [
+    {
+      "env": {
+        "jest": true,
+        "globalThis": true
+      },
+      "extends": ["plugin:jest/recommended"],
+      "plugins": ["jest"],
+      "files": ["*.test.js"],
+      "rules": {
+        "no-unused-expressions": "off",
+        "jest/no-setup-in-describe": "warn"
+      }
+    }
+  ]
 }

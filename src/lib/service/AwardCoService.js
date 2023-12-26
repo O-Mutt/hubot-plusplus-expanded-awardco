@@ -11,8 +11,10 @@ class AwardCoService {
         'Content-Type': 'application/json',
       },
     });
-    this.defaultNote = procVars.awardCoDefaultNote
-      || `${procVars.awardCoName} given through ${this.robot.name}`;
+
+    this.defaultNote =
+      procVars.awardCoDefaultNote ||
+      `${procVars.awardCoName} given through ${this.robot.name}`;
   }
 
   /**
@@ -25,8 +27,8 @@ class AwardCoService {
     for (const event of events) {
       this.robot.logger.debug(
         `Sending a award co award to ${JSON.stringify(
-          event.recipient.slackEmail,
-        )} from ${JSON.stringify(event.sender.slackEmail)}`,
+          event.recipient.slackEmail
+        )} from ${JSON.stringify(event.sender.slackEmail)}`
       );
       let note = this.defaultNote;
       if (event.reason) {
@@ -41,7 +43,7 @@ class AwardCoService {
           rewardedBy: event.sender.slackEmail,
           // amount: event.amount, // this is used for $ cash dollars and is not currently supported due to lack of `/budget` endpoint
           note,
-        }),
+        })
       );
     }
 
@@ -57,7 +59,7 @@ class AwardCoService {
       } else {
         this.robot.logger.error(
           'Error sending awardCo award',
-          result.reason.response.data,
+          result.reason.response.data
         );
         responses.push({
           response: result.reason.response.data,
