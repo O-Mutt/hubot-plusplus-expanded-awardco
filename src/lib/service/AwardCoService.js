@@ -1,7 +1,9 @@
 const Axios = require('axios');
+const Helpers = require('../helpers');
 
 class AwardCoService {
-  constructor(robot, procVars) {
+  constructor(robot) {
+    const procVars = Helpers.createProcVars(robot.name);
     this.robot = robot;
     this.apiKey = procVars.awardCoApiKey;
     this.url = procVars.awardCoUri;

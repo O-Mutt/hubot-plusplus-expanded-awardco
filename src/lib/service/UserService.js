@@ -1,7 +1,10 @@
 const { MongoClient } = require('mongodb');
+const Helpers = require('../helpers');
 
 class UserService {
-  constructor(robot, procVars) {
+  constructor(robot) {
+    const procVars = Helpers.createProcVars(robot.name);
+
     this.db = undefined;
     this.robot = robot;
     this.uri = procVars.mongoUri;
@@ -9,11 +12,10 @@ class UserService {
   }
 
   async init() {
-    const client = new MongoClient(this.uri,
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
+    const client = new MongoClient(this.uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
     const connection = await client.connect();
     this.db = connection.db();
   }
@@ -33,10 +35,9 @@ class UserService {
   async getUser(slackId) {
     const db = await this.getDb();
 
-    const dbUser = await db.collection('scores').findOne(
-      { slackId },
-      { sort: { score: -1 } },
-    );
+    const dbUser = await db
+      .collection('scores')
+      .findOne({ slackId }, { sort: { score: -1 } });
 
     return dbUser;
   }
@@ -44,32 +45,38 @@ class UserService {
   async setAwardCoResponse(user, response) {
     const db = await this.getDb();
 
-    await db.collection('scores').updateOne(
-      { slackId: user.slackId },
-      { $set: { awardCoResponse: response } },
-      { sort: { score: -1 } },
-    );
+    await db
+      .collection('scores')
+      .updateOne(
+        { slackId: user.slackId },
+        { $set: { awardCoResponse: response } },
+        { sort: { score: -1 } }
+      );
   }
 
   async setAwardCoAmount(user, amount) {
     const db = await this.getDb();
 
-    await db.collection('scores').updateOne(
-      { slackId: user.slackId },
-      { $set: { awardCoAmount: amount } },
-      { sort: { score: -1 } },
-    );
+    await db
+      .collection('scores')
+      .updateOne(
+        { slackId: user.slackId },
+        { $set: { awardCoAmount: amount } },
+        { sort: { score: -1 } }
+      );
   }
 
   async toggleAwardCoDM(user) {
     const db = await this.getDb();
 
     const shouldDM = user.awardCoDM ? !user.awardCoDM : false;
-    await db.collection('scores').updateOne(
-      { slackId: user.slackId },
-      { $set: { awardCoDM: shouldDM } },
-      { sort: { score: -1 } },
-    );
+    await db
+      .collection('scores')
+      .updateOne(
+        { slackId: user.slackId },
+        { $set: { awardCoDM: shouldDM } },
+        { sort: { score: -1 } }
+      );
   }
 }
 
