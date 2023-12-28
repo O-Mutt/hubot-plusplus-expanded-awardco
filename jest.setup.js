@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
 const mongoUnit = require('mongo-unit');
+const { wait } = require('./test/util');
 
 module.exports = async (globalConfig) => {
   const orgTimeout = globalConfig.testTimeout;
@@ -8,6 +9,8 @@ module.exports = async (globalConfig) => {
     version: '6.0.9',
     port: Math.floor(Math.random() * 10000) + 10000,
   });
+  await wait(1000);
+
   console.log('$$$$$$$$ ==== ', url);
   const client = new MongoClient(url, {
     useNewUrlParser: true,
