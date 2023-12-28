@@ -19,7 +19,7 @@ module.exports = async (globalConfig) => {
   });
   const connection = await client.connect();
   connection.db();
-  process.env.MONGODB_URI = mongoUnit.getUrl();
+  process.env.MONGO_URI = mongoUnit.getUrl();
   process.env.AWARDCO_API_KEY = 'test_123';
 
   // Set reference to mongod in order to close the server during teardown.
