@@ -8,10 +8,7 @@ describe('index', () => {
   beforeEach(() => {
     jest.mock('./lib/service/UserService');
     plusPlusAwardCo = new Helper('../src/index.js');
-    room = plusPlusAwardCo.createRoom({
-      httpd: false,
-      name: 'D123',
-    });
+    room = plusPlusAwardCo.createRoom();
   });
 
   afterEach(() => {
