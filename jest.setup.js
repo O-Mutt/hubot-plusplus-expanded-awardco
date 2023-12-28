@@ -10,6 +10,9 @@ module.exports = async (globalConfig) => {
     port: Math.floor(Math.random() * 10000) + 10000,
   });
 
+  await wait(1000);
+  console.log('$$$$$$', url, ' ==== ', mongoUnit.getUrl());
+
   const client = new MongoClient(mongoUnit.getUrl(), {
     useNewUrlParser: true,
     useUnifiedTopology: true,
