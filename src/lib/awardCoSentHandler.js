@@ -2,9 +2,6 @@ const Helpers = require('./helpers');
 const UserService = require('./service/UserService');
 
 class AwardCoMessageHandler {
-  robot;
-  awardName;
-  userService;
   constructor(robot) {
     const procVars = Helpers.createProcVars(robot.name);
 
@@ -15,13 +12,13 @@ class AwardCoMessageHandler {
 
   async handleAwardCoSent(awardResponses) {
     const messages = [];
-    for (const ar of awardResponses) {
+    awardResponses.forEach(async (ar) => {
       if (ar.response.success === true) {
         this.robot.logger.debug(
-          'awardCo point was sent and we caught the event.'
+          'awardCo point was sent and we caught the event.',
         );
         messages.push(
-          `We sent a(n) ${this.awardName} to <@${ar.event.recipient.slackId}>.`
+          `We sent a(n) ${this.awardName} to <@${ar.event.recipient.slackId}>.`,
         );
         const user = await this.userService.getUser(ar.event.sender.slackId);
         if (user.awardCoDM === true || user.awardCoDM === undefined) {
@@ -38,13 +35,13 @@ class AwardCoMessageHandler {
       } else {
         this.robot.logger.error(
           'there was an issue sending a award',
-          ar.response
+          ar.response,
         );
         messages.push(
-          `Sorry, there was an issue sending your ${this.awardName} award: ${ar.response.message}`
+          `Sorry, there was an issue sending your ${this.awardName} award: ${ar.response.message}`,
         );
       }
-    }
+    });
     awardResponses[0].event.msg.send(messages.join('\n'));
   }
 }

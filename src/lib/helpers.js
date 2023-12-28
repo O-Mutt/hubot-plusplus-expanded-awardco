@@ -1,5 +1,5 @@
 function createProcVars(robotName) {
-  const env = process.env;
+  const { env } = process;
   const procVars = {};
   procVars.robotName = robotName ?? 'hubot';
   procVars.mongoUri = env.MONGO_URI ?? 'mongodb://localhost/plusPlus';

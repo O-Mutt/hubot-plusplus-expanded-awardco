@@ -25,29 +25,26 @@ class AwardCoService {
    * @returns the user from the scores db, undefined if not found
    */
   async sendAwards(events) {
-    const promises = [];
-    for (const event of events) {
+    const promises = events.map((event) => {
       this.robot.logger.debug(
         `Sending a award co award to ${JSON.stringify(
-          event.recipient.slackEmail
-        )} from ${JSON.stringify(event.sender.slackEmail)}`
+          event.recipient.slackEmail,
+        )} from ${JSON.stringify(event.sender.slackEmail)}`,
       );
       let note = this.defaultNote;
       if (event.reason) {
-        const buff = new Buffer.from(event.reason, 'base64');
+        const buff = Buffer.from(event.reason, 'base64');
         note = `${buff.toString('UTF-8')} (via ${this.robot.name})`;
       }
 
-      promises.push(
-        this.axios.post('/reward', {
-          apiKey: this.apiKey,
-          email: event.recipient.slackEmail,
-          rewardedBy: event.sender.slackEmail,
-          // amount: event.amount, // this is used for $ cash dollars and is not currently supported due to lack of `/budget` endpoint
-          note,
-        })
-      );
-    }
+      return this.axios.post('/reward', {
+        apiKey: this.apiKey,
+        email: event.recipient.slackEmail,
+        rewardedBy: event.sender.slackEmail,
+        // amount: event.amount,   // this is used for $ cash dollars and is not currently supported due to lack of `/budget` endpoint
+        note,
+      });
+    });
 
     const responses = [];
     const results = await Promise.allSettled(promises);
@@ -61,7 +58,7 @@ class AwardCoService {
       } else {
         this.robot.logger.error(
           'Error sending awardCo award',
-          result.reason.response.data
+          result.reason.response.data,
         );
         responses.push({
           response: result.reason.response.data,

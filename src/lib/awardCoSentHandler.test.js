@@ -2,16 +2,14 @@ const AwardCoSentHandler = require('./awardCoSentHandler');
 const mockHubot = require('../../test/mockHubot');
 const Helpers = require('./helpers');
 const UserService = require('./service/UserService');
+const { wait } = require('../../test/util');
 jest.mock('./service/UserService');
 
 describe('AwardCoSentHandler', () => {
-  let processVariables;
   let instance;
 
   beforeEach(() => {
-    UserService.mockClear();
-    UserService.mockGetUser.mockClear();
-    processVariables = Helpers.createProcVars(mockHubot.name);
+    jest.clearAllMocks();
 
     instance = new AwardCoSentHandler(mockHubot);
   });
@@ -29,6 +27,7 @@ describe('AwardCoSentHandler', () => {
     ];
 
     await instance.handleAwardCoSent(awardResponses);
+    await wait(); // Silly hubot timing things
 
     expect(mockHubot.messageRoom).toHaveBeenCalled();
     expect(awardResponses[0].event.msg.send).toHaveBeenCalled();
@@ -47,7 +46,9 @@ describe('AwardCoSentHandler', () => {
     ];
 
     await instance.handleAwardCoSent(awardResponses);
+    await wait(); // Silly hubot timing things
 
+    expect(mockHubot.messageRoom).not.toHaveBeenCalled();
     expect(awardResponses[0].event.msg.send).toHaveBeenCalled();
   });
 });

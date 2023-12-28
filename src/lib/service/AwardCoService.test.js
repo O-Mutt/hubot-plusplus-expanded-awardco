@@ -26,7 +26,7 @@ describe('AwardCoService', () => {
       expect(instance.apiKey).toStrictEqual(processVariables.awardCoApiKey);
       expect(instance.url).toStrictEqual(processVariables.awardCoUri);
       expect(instance.defaultNote).toStrictEqual(
-        processVariables.awardCoDefaultNote
+        processVariables.awardCoDefaultNote,
       );
       expect(axiosMock.create).toHaveBeenCalled();
     });
@@ -87,14 +87,14 @@ describe('AwardCoService', () => {
       expect(responses[0].event).toHaveProperty('sender');
       expect(responses[0].event.sender).toHaveProperty('slackEmail');
       expect(responses[0].event.sender.slackEmail).toStrictEqual(
-        'derp@derp.com'
+        'derp@derp.com',
       );
 
       expect(responses[0]).toHaveProperty('event');
       expect(responses[0].event).toHaveProperty('recipient');
       expect(responses[0].event.recipient).toHaveProperty('slackEmail');
       expect(responses[0].event.recipient.slackEmail).toStrictEqual(
-        'rec_derp@derp.com'
+        'rec_derp@derp.com',
       );
 
       expect(responses[0]).toHaveProperty('response');

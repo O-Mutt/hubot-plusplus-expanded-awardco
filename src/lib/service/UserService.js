@@ -50,7 +50,7 @@ class UserService {
       .updateOne(
         { slackId: user.slackId },
         { $set: { awardCoResponse: response } },
-        { sort: { score: -1 } }
+        { sort: { score: -1 } },
       );
   }
 
@@ -62,7 +62,7 @@ class UserService {
       .updateOne(
         { slackId: user.slackId },
         { $set: { awardCoAmount: amount } },
-        { sort: { score: -1 } }
+        { sort: { score: -1 } },
       );
   }
 
@@ -75,7 +75,7 @@ class UserService {
       .updateOne(
         { slackId: user.slackId },
         { $set: { awardCoDM: shouldDM } },
-        { sort: { score: -1 } }
+        { sort: { score: -1 } },
       );
   }
 }

@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 const mongoUnit = require('mongo-unit');
 
-module.exports = async function (globalConfig, projectConfig) {
+module.exports = async (globalConfig) => {
   const orgTimeout = globalConfig.testTimeout;
   globalConfig.testTimeout = 100000;
   const url = await mongoUnit.start({

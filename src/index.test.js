@@ -1,6 +1,6 @@
 const { test, expect, beforeEach, describe } = require('@jest/globals');
 const Helper = require('hubot-test-helper');
-const { handleAwardCoSent } = require('./index');
+const { wait } = require('../test/util');
 
 describe('index', () => {
   let plusPlusAwardCo;
@@ -20,7 +20,7 @@ describe('index', () => {
   test('responds to basic change awardco config', async () => {
     room.name = 'D123';
     room.user.say('matt.erickson', 'change awardco config');
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await wait(); // Silly hubot timing things
     expect(true).toStrictEqual(true);
   });
 });
