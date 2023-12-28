@@ -9,6 +9,8 @@ module.exports = async (globalConfig) => {
     version: '6.0.12',
     port: Math.floor(Math.random() * 10000) + 10000,
   });
+
+  console.log('$$$$$$', url, ' ==== ', mongoUnit.getUrl());
   await wait(30000);
 
   const client = new MongoClient(url, {
