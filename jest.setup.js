@@ -17,8 +17,6 @@ module.exports = async (globalConfig) => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-  const connection = await client.connect();
-  connection.db();
   process.env.MONGO_URI = mongoUnit.getUrl();
   process.env.AWARDCO_API_KEY = 'test_123';
 
