@@ -6,6 +6,7 @@ module.exports = async (globalConfig) => {
   globalConfig.testTimeout = 100000;
   const url = await mongoUnit.start({
     version: '6.0.9',
+    port: Math.floor(Math.random() * 10000) + 10000,
   });
   const client = new MongoClient(url, {
     useNewUrlParser: true,
