@@ -8,7 +8,7 @@ module.exports = {
   globalSetup: './jest.setup.js',
   globalTeardown: './jest.teardown.js',
   globals: {
-    MONGOD: null,
+    MONGO_CLIENT: null,
   },
   // setupFilesAfterEnv: ['./jest.setup.js'],
 };
