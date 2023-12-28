@@ -4,11 +4,12 @@ const { wait } = require('./test/util');
 
 module.exports = async (globalConfig) => {
   const orgTimeout = globalConfig.testTimeout;
-  globalConfig.testTimeout = 100000;
+  globalConfig.testTimeout = 500000;
   const url = await mongoUnit.start({
     version: '6.0.12',
     port: Math.floor(Math.random() * 10000) + 10000,
   });
+  await wait(30000);
 
   const client = new MongoClient(url, {
     useNewUrlParser: true,
