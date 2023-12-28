@@ -10,6 +10,7 @@ describe('index', () => {
     plusPlusAwardCo = new Helper('../src/index.js');
     room = plusPlusAwardCo.createRoom({
       httpd: false,
+      name: 'D123',
     });
   });
 
