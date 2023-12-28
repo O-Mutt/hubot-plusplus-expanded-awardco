@@ -10,16 +10,13 @@ module.exports = async (globalConfig) => {
     port: Math.floor(Math.random() * 10000) + 10000,
   });
 
-  console.log('$$$$$$', url, ' ==== ', mongoUnit.getUrl());
-  await wait(30000);
-
-  const client = new MongoClient(url, {
+  const client = new MongoClient(mongoUnit.getUrl(), {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
   const connection = await client.connect();
   connection.db();
-  process.env.MONGODB_URI = url;
+  process.env.MONGODB_URI = mongoUnit.getUrl();
   process.env.AWARDCO_API_KEY = 'test_123';
 
   // Set reference to mongod in order to close the server during teardown.
