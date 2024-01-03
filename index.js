@@ -11,22 +11,20 @@ function isIgnored(file, filePath) {
     return true;
   }
 
-  if (filePath) {
+  if (
+    file.endsWith('.test.js') ||
+    file.endsWith('.test.coffee') ||
+    file.endsWith('.test.ts')
+  ) {
+    return true;
+  }
+  if (path.extname(file) === '.js') {
+    const maybeExported = require(filePath);
     if (
-      file.endsWith('.test.js') ||
-      file.endsWith('.test.coffee') ||
-      file.endsWith('.test.ts')
+      !(maybeExported instanceof Function) ||
+      maybeExported.toString().startsWith('class')
     ) {
       return true;
-    }
-    if (path.extname(file) === '.js') {
-      const maybeExported = require(filePath);
-      if (
-        !(maybeExported instanceof Function) ||
-        maybeExported.toString().startsWith('class')
-      ) {
-        return true;
-      }
     }
   }
   return false;
@@ -39,10 +37,10 @@ function loadScripts(robot, directory) {
     const filePath = path.join(directory, file);
     const stats = fs.statSync(filePath);
 
-    if (stats.isDirectory() && !isIgnored(file)) {
+    if (stats.isDirectory() && !isIgnored(file, filePath)) {
       // Recurse into subdirectory
       results.push(...loadScripts(robot, filePath));
-    } else if (!isIgnored(file, path, filePath)) {
+    } else if (!isIgnored(file, filePath)) {
       results.push(robot.loadFile(directory, file));
     }
   });
