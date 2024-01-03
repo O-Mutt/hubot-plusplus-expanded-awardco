@@ -1,7 +1,36 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 /* eslint-disable no-console */
 /* eslint-disable no-continue */
+
 const fs = require('fs');
 const path = require('path');
+
+function isIgnored(file, filePath) {
+  if (file === '__tests__' || file === '__mocks__') {
+    return true;
+  }
+
+  if (filePath) {
+    if (
+      file.endsWith('.test.js') ||
+      file.endsWith('.test.coffee') ||
+      file.endsWith('.test.ts')
+    ) {
+      return true;
+    }
+    if (path.extname(file) === '.js') {
+      const maybeExported = require(filePath);
+      if (
+        !(maybeExported instanceof Function) ||
+        maybeExported.toString().startsWith('class')
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 function loadScripts(robot, directory) {
   const results = [];
@@ -10,19 +39,11 @@ function loadScripts(robot, directory) {
     const filePath = path.join(directory, file);
     const stats = fs.statSync(filePath);
 
-    if (stats.isDirectory()) {
+    if (stats.isDirectory() && !isIgnored(file)) {
       // Recurse into subdirectory
       results.push(...loadScripts(robot, filePath));
-    } else if (!file.endsWith('.test.js') && path.extname(file) === '.js') {
-      // Load .js files that don't export a class
-      // eslint-disable-next-line import/no-dynamic-require, global-require
-      const exported = require(filePath);
-      if (
-        exported instanceof Function &&
-        !exported.toString().startsWith('class')
-      ) {
-        results.push(robot.loadFile(directory, file));
-      }
+    } else if (!isIgnored(file, path, filePath)) {
+      results.push(robot.loadFile(directory, file));
     }
   });
 
