@@ -38,7 +38,7 @@ class AwardCoMessageHandler {
           ar.response,
         );
         messages.push(
-          `Sorry, there was an issue sending your ${this.awardName} award: ${ar.response.message}`,
+          `Sorry, there was an issue sending your ${this.awardName} award to <@${ar.event.recipient.slackId}>: ${ar.response.message}`,
         );
       }
     });
