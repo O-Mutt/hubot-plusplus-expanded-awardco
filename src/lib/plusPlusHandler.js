@@ -26,28 +26,48 @@ class PlusPlusMessageHandler {
    * @returns
    */
   async handlePlusPlus(events) {
+    const firstEvent = events[0];
+    const { sender } = firstEvent;
     const switchBoard = new Conversation(this.robot);
-    if (!['++', '+'].includes(events.direction)) {
+    if (!['++', '+'].includes(firstEvent.direction)) {
       this.robot.logger.debug(
         `Points were taken away, not given. We won't talk to ${
           this.awardName
-        } for this one.\n${JSON.stringify(events.direction)}`,
+        } for this one.\n${JSON.stringify(firstEvent.direction)}`,
       );
       return;
     }
 
-    if (!events.sender.slackEmail || !events.recipient.slackEmail) {
-      const message = `<@${events.sender.slackId}> is trying to send to <@${events.recipient.slackId}> but the one of the emails are missing. Sender: [${events.sender.slackEmail}], Recipient: [${events.recipient.slackEmail}]`;
-      this.robot.logger.error(message);
+    if (!sender.slackEmail) {
       this.robot.emit('plus-plus-failure', {
-        notificationMessage: `${message} in <#${events.room}>`,
-        room: events.room,
+        notificationMessage: `${sender.name} is missing their slack email in ${this.robot.name}. The message was sent in <#${firstEvent.room}>`,
+        room: firstEvent.room,
       });
       return;
     }
 
+    const ineligibleRecipients = events.filter((e) => !e.recipient.slackEmail);
+    if (ineligibleRecipients.length > 0) {
+      const message = `The following recipients are missing their slack email in ${
+        this.robot.name
+      }: <@${ineligibleRecipients
+        .map((ir) => ir.slackId ?? ir.name)
+        .join('>, <@')}>. The message was sent in <#${firstEvent.room}>`;
+      this.robot.logger.error(message);
+      this.robot.emit('plus-plus-failure', {
+        notificationMessage: `${message} in <#${firstEvent.room}>`,
+        room: firstEvent.room,
+      });
+    }
+
+    const eligibleRecipients = events
+      .filter((e) => e.recipient.slackEmail)
+      .map((e) => e.recipient);
+    const eligibleRecipientsSlackTagString = `<@${eligibleRecipients
+      .map((er) => er.slackId ?? er.name)
+      .join('>, <@')}>`;
     const { awardCoAmount = 1 } = await this.userService.getUser(
-      events.sender.slackId,
+      sender.slackId,
     );
     events.forEach((e) => {
       e.amount = awardCoAmount;
@@ -56,7 +76,7 @@ class PlusPlusMessageHandler {
     const msg = {
       message: {
         user: {
-          id: events.sender.slackId,
+          id: sender.slackId,
         },
       },
     };
@@ -78,7 +98,7 @@ There are three options how you can setup ${this.robot.name} to do this:\n
 
 How would you like to configure ${this.robot.name}? (You can always change this later by DMing me \`change my ${this.awardName} settings\`)\n
 [ \`Always\` | \`Prompt\` | \`Never\` ]`;
-      this.robot.messageRoom(events.sender.slackId, choiceMsg);
+      this.robot.messageRoom(sender.slackId, choiceMsg);
       dialog.addChoice(/always/i, async () => {
         await this.userService.setAwardCoResponse(
           events.sender,
@@ -93,36 +113,29 @@ How would you like to configure ${this.robot.name}? (You can always change this 
         );
         this.robot.messageRoom(
           events.sender.slackId,
-          `In that case, do you want to send <@${events
-            .map((e) => e.recipient.slackId)
-            .join('>, <@')}> a(n) ${this.awardName} worth ${
-            events.amount
-          }?\n[ \`Yes\` | \`No\` ]`,
+          `In that case, do you want to send ${eligibleRecipientsSlackTagString} a(n) ${this.awardName} worth ${events.amount}?\n[ \`Yes\` | \`No\` ]`,
         );
         dialog.addChoice(/yes/i, async () => {
           this.sendAwards(events);
         });
         dialog.addChoice(/no/i, async () => {
-          this.robot.messageRoom(
-            events.sender.slackId,
-            'Ah, alright. Next time!',
-          );
+          this.robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
         });
       });
       dialog.addChoice(/never/i, async () => {
         await this.userService.setAwardCoResponse(
-          events.sender,
+          sender,
           AwardCoResponse.NEVER,
         );
         this.robot.messageRoom(
-          events.sender.slackId,
+          sender.slackId,
           'Alright! No worries. If you ever change your mind we can change your mind just let me know (DM me `change my awardCo settings`)!',
         );
       });
       return;
     }
 
-    switch (events.sender.awardCoResponse) {
+    switch (sender.awardCoResponse) {
       case AwardCoResponse.ALWAYS:
         this.sendAwards(events);
         break;
@@ -130,22 +143,19 @@ How would you like to configure ${this.robot.name}? (You can always change this 
         const dialog = switchBoard.startDialog(msg);
         dialog.dialogTimeout = () => {
           this.robot.messageRoom(
-            events.sender.slackId,
+            sender.slackId,
             "We didn't receive your response in time. Please try again.",
           );
         };
         this.robot.messageRoom(
-          events.sender.slackId,
-          `You just gave <@${events.recipient.slackId}> a ${this.robot.name} point and ${this.awardName} is enabled, would you like to send them ${events.amount} point(s) on ${this.awardName} as well?\n[ \`Yes\` | \`No\` ]`,
+          sender.slackId,
+          `You just gave ${eligibleRecipientsSlackTagString} a ${this.robot.name} point and ${this.awardName} is enabled, would you like to send them ${firstEvent.amount} point(s) on ${this.awardName} as well?\n[ \`Yes\` | \`No\` ]`,
         );
         dialog.addChoice(/yes/i, async () => {
           this.sendAwards(events);
         });
         dialog.addChoice(/no/i, () => {
-          this.robot.messageRoom(
-            events.sender.slackId,
-            'Ah, alright. Next time!',
-          );
+          this.robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
         });
         break;
       }
