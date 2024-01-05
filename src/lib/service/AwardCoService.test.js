@@ -1,35 +1,17 @@
 // AwardCoService.test.js
 const { beforeEach, describe } = require('@jest/globals');
-const Helpers = require('../helpers');
+const H = require('../helpers');
 const mockHubot = require('../../../test/mockHubot');
+const AwardCoService = require('./AwardCoService');
+const axiosMock = require('axios');
+jest.mock('axios');
 
 describe('AwardCoService', () => {
-  let axiosMock;
   let processVariables;
-  let AwardCoService;
-  let instance;
 
   beforeEach(async () => {
-    processVariables = Helpers.createProcVars(mockHubot.name);
-    axiosMock = require('axios');
+    processVariables = H.createProcVars(mockHubot.name);
     axiosMock.create.mockReturnThis();
-    jest.mock('axios');
-    AwardCoService = require('./AwardCoService');
-
-    instance = new AwardCoService(mockHubot, processVariables);
-  });
-
-  describe('constructor', () => {
-    test('constructor should set the correct properties', () => {
-      // clear the call in the before each
-      expect(instance.robot).toStrictEqual(mockHubot);
-      expect(instance.apiKey).toStrictEqual(processVariables.awardCoApiKey);
-      expect(instance.url).toStrictEqual(processVariables.awardCoUri);
-      expect(instance.defaultNote).toStrictEqual(
-        processVariables.awardCoDefaultNote,
-      );
-      expect(axiosMock.create).toHaveBeenCalled();
-    });
   });
 
   describe('sendAwards', () => {
@@ -49,8 +31,6 @@ describe('AwardCoService', () => {
           },
         },
       });
-
-      instance = new AwardCoService(mockHubot, processVariables);
     });
 
     afterEach(() => {
@@ -69,7 +49,7 @@ describe('AwardCoService', () => {
         },
       ];
 
-      const responses = await instance.sendAwards(awards);
+      const responses = await AwardCoService.sendAwards(mockHubot, awards);
 
       expect(axiosMock.post).toHaveBeenCalled();
       expect(axiosMock.post).toHaveBeenCalledWith('/reward', {
@@ -132,7 +112,7 @@ describe('AwardCoService', () => {
         },
       ];
 
-      const responses = await instance.sendAwards(awards);
+      const responses = await AwardCoService.sendAwards(mockHubot, awards);
 
       expect(axiosMock.post).toHaveBeenCalled();
       expect(axiosMock.post).toHaveBeenCalledTimes(3);

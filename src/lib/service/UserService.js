@@ -1,30 +1,24 @@
 const { MongoClient } = require('mongodb');
-const Helpers = require('../helpers');
+const H = require('../helpers');
 
 class UserService {
-  constructor(robot) {
-    const procVars = Helpers.createProcVars(robot.name);
+  static db;
 
-    this.db = undefined;
-    this.robot = robot;
-    this.uri = procVars.mongoUri;
-    this.init(); // this is async but should kick off the connection
-  }
-
-  async init() {
-    const client = new MongoClient(this.uri, {
+  static async init() {
+    const { mongoUri } = H.createProcVars();
+    const client = new MongoClient(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     const connection = await client.connect();
-    this.db = connection.db();
+    UserService.db = connection.db();
   }
 
-  async getDb() {
-    if (!this.db) {
-      await this.init();
+  static async getDb() {
+    if (!UserService.db) {
+      await UserService.init();
     }
-    return this.db;
+    return UserService.db;
   }
 
   /**
@@ -32,8 +26,8 @@ class UserService {
    * @param {string} slackId the slack id of the user to find
    * @returns the user from the scores db, undefined if not found
    */
-  async getUser(slackId) {
-    const db = await this.getDb();
+  static async getUser(slackId) {
+    const db = await UserService.getDb();
 
     const dbUser = await db
       .collection('scores')
@@ -42,8 +36,8 @@ class UserService {
     return dbUser;
   }
 
-  async setAwardCoResponse(user, response) {
-    const db = await this.getDb();
+  static async setAwardCoResponse(user, response) {
+    const db = await UserService.getDb();
 
     await db
       .collection('scores')
@@ -54,8 +48,8 @@ class UserService {
       );
   }
 
-  async setAwardCoAmount(user, amount) {
-    const db = await this.getDb();
+  static async setAwardCoAmount(user, amount) {
+    const db = await UserService.getDb();
 
     await db
       .collection('scores')
@@ -66,8 +60,8 @@ class UserService {
       );
   }
 
-  async toggleAwardCoDM(user) {
-    const db = await this.getDb();
+  static async toggleAwardCoDM(user) {
+    const db = await UserService.getDb();
 
     const shouldDM = user.awardCoDM ? !user.awardCoDM : false;
     await db
@@ -81,3 +75,4 @@ class UserService {
 }
 
 module.exports = UserService;
+module.exports.us = UserService;

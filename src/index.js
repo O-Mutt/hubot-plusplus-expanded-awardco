@@ -14,33 +14,36 @@
 //
 // Author: O-Mutt
 
-const Helpers = require('./lib/helpers');
-const PlusPlusMessageHandler = require('./lib/plusPlusHandler');
-const AwardCoMessageHandler = require('./lib/awardCoSentHandler');
-const SettingsHandler = require('./lib/settingsHandler');
+const H = require('./lib/helpers');
+const { ppmh } = require('./lib/plusPlusHandler');
+const { sh } = require('./lib/settingsHandler');
 
 module.exports = (robot) => {
-  const procVars = Helpers.createProcVars(robot.name);
-  const awardCoMessageHandler = new AwardCoMessageHandler(robot);
-  const plusPlusMessageHandler = new PlusPlusMessageHandler(robot);
-  const settingsHandler = new SettingsHandler(robot);
+  const { awardCoName, awardCoApiKey } = H.createProcVars(robot.name);
 
-  const awardName = procVars.awardCoName;
-  if (!procVars.awardCoApiKey) {
+  if (!awardCoApiKey) {
     robot.logger.error(
       'hubot-plusplus-expanded-awardCo is installed but the awardCo api key is not configured',
     );
     return;
   }
 
-  robot.on('plus-plus', plusPlusMessageHandler.handlePlusPlus);
-  robot.on('plus-plus-awardCo-sent', awardCoMessageHandler.handleAwardCoSent);
+  robot.on('plus-plus', (...args) => ppmh.handlePlusPlus(robot, args));
+  robot.on('plus-plus-awardCo-sent', (...args) =>
+    ppmh.handleAwardCoSent(robot, args),
+  );
+
   const changeSettingsRegExp = new RegExp(
-    `.*change.*${awardName}\\s?(?:integration)?\\s?(?:configuration|config|response|setting|settings).*`,
+    `.*change.*${awardCoName}\\s?(?:integration)?\\s?(?:configuration|config|response|setting|settings).*`,
     'ig',
   );
-  const dmSettingRegExp = new RegExp(`.*toggle dm about ${awardName}.*`, 'ig');
-  robot.respond(changeSettingsRegExp, settingsHandler.changeAwardCoConfig);
+  robot.respond(changeSettingsRegExp, (msg) =>
+    sh.changeAwardCoConfig(robot, msg),
+  );
   // robot.respond(/.*change.*awardCo.*(points|amount).*/ig, changeAwardCoAmount);
-  robot.respond(dmSettingRegExp, settingsHandler.toggleAwardCoDM);
+  const dmSettingRegExp = new RegExp(
+    `.*toggle dm about ${awardCoName}.*`,
+    'ig',
+  );
+  robot.respond(dmSettingRegExp, (msg) => sh.toggleAwardCoDM(robot, msg));
 };
