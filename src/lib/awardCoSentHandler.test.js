@@ -1,17 +1,13 @@
-const AwardCoSentHandler = require('./awardCoSentHandler');
+const { acmh } = require('./awardCoSentHandler');
 const mockHubot = require('../../test/mockHubot');
-const Helpers = require('./helpers');
-const UserService = require('./service/UserService');
+const { us } = require('./service/UserService');
+
 const { wait } = require('../../test/util');
-jest.mock('./service/UserService');
 
 describe('AwardCoSentHandler', () => {
-  let instance;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    instance = new AwardCoSentHandler(mockHubot);
+    us.getUser = jest.fn().mockResolvedValue({ awardCoDM: true });
   });
 
   test('should handle successful award responses', async () => {
@@ -26,7 +22,7 @@ describe('AwardCoSentHandler', () => {
       },
     ];
 
-    await instance.handleAwardCoSent(awardResponses);
+    await acmh.handleAwardCoSent(mockHubot, awardResponses);
     await wait(); // Silly hubot timing things
 
     expect(mockHubot.messageRoom).toHaveBeenCalled();
@@ -45,7 +41,7 @@ describe('AwardCoSentHandler', () => {
       },
     ];
 
-    await instance.handleAwardCoSent(awardResponses);
+    await acmh.handleAwardCoSent(mockHubot, awardResponses);
     await wait(); // Silly hubot timing things
 
     expect(mockHubot.messageRoom).not.toHaveBeenCalled();

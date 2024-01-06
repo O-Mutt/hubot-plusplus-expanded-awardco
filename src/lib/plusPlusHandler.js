@@ -1,17 +1,10 @@
 const Conversation = require('hubot-conversation');
-const Helpers = require('./helpers');
-const AwardCoService = require('./service/AwardCoService');
+const H = require('./helpers');
+const { acs } = require('./service/AwardCoService');
 const { AwardCoResponse } = require('./service/AwardCoResponseEnum');
+const { us } = require('./service/UserService');
 
 class PlusPlusMessageHandler {
-  constructor(robot) {
-    const procVars = Helpers.createProcVars(robot.name);
-
-    this.robot = robot;
-    this.awardName = procVars.awardCoName;
-    this.awardCoService = new AwardCoService(robot);
-  }
-
   /**
    * The event that was emitted by the plus-plus module for a user
    * (https://github.com/O-Mutt/hubot-plusplus-expanded/blob/main/src/plusplus.js#L270-L277)
@@ -25,22 +18,23 @@ class PlusPlusMessageHandler {
    * @param {object} events[].msg the msg from hubot that the event originated from
    * @returns
    */
-  async handlePlusPlus(events) {
+  static async handlePlusPlus(robot, events) {
+    const { robotName, awardName } = H.createProcVars(robot.name);
     const firstEvent = events[0];
     const { sender } = firstEvent;
-    const switchBoard = new Conversation(this.robot);
+    const switchBoard = new Conversation(robot);
     if (!['++', '+'].includes(firstEvent.direction)) {
-      this.robot.logger.debug(
-        `Points were taken away, not given. We won't talk to ${
-          this.awardName
-        } for this one.\n${JSON.stringify(firstEvent.direction)}`,
+      robot.logger.debug(
+        `Points were taken away, not given. We won't talk to ${awardName} for this one.\n${JSON.stringify(
+          firstEvent.direction,
+        )}`,
       );
       return;
     }
 
     if (!sender.slackEmail) {
-      this.robot.emit('plus-plus-failure', {
-        notificationMessage: `${sender.name} is missing their slack email in ${this.robot.name}. The message was sent in <#${firstEvent.room}>`,
+      robot.emit('plus-plus-failure', {
+        notificationMessage: `${sender.name} is missing their slack email in ${robotName}. The message was sent in <#${firstEvent.room}>`,
         room: firstEvent.room,
       });
       return;
@@ -48,13 +42,11 @@ class PlusPlusMessageHandler {
 
     const ineligibleRecipients = events.filter((e) => !e.recipient.slackEmail);
     if (ineligibleRecipients.length > 0) {
-      const message = `The following recipients are missing their slack email in ${
-        this.robot.name
-      }: <@${ineligibleRecipients
+      const message = `The following recipients are missing their slack email in ${robotName}: <@${ineligibleRecipients
         .map((ir) => ir.slackId ?? ir.name)
         .join('>, <@')}>. The message was sent in <#${firstEvent.room}>`;
-      this.robot.logger.error(message);
-      this.robot.emit('plus-plus-failure', {
+      robot.logger.error(message);
+      robot.emit('plus-plus-failure', {
         notificationMessage: `${message} in <#${firstEvent.room}>`,
         room: firstEvent.room,
       });
@@ -66,9 +58,7 @@ class PlusPlusMessageHandler {
     const eligibleRecipientsSlackTagString = `<@${eligibleRecipients
       .map((er) => er.slackId ?? er.name)
       .join('>, <@')}>`;
-    const { awardCoAmount = 1 } = await this.userService.getUser(
-      sender.slackId,
-    );
+    const { awardCoAmount = 1 } = await us.getUser(robot, sender.slackId);
     events.forEach((e) => {
       e.amount = awardCoAmount;
     });
@@ -84,50 +74,41 @@ class PlusPlusMessageHandler {
     if (!events.sender.awardCoResponse) {
       const dialog = switchBoard.startDialog(msg);
       dialog.dialogTimeout = () => {
-        this.robot.messageRoom(
+        robot.messageRoom(
           events.sender.slackId,
           "We didn't receive your response in time. Please try again.",
         );
       };
       // check with user how they want to handle hubot points/awardCo awards
-      const choiceMsg = `${this.robot.name} is setup to allow you to also send a(n) ${this.awardName} point when you send a ${this.robot.name} point! \n
-There are three options how you can setup ${this.robot.name} to do this:\n
-• Always send a(n) ${this.awardName} when you send a ${this.robot.name} point.\n
-• Prompt every time to send a ${this.robot.name} point to include a(n) ${this.awardName} point.\n
-• Never include a(n) ${this.awardName} point with ${this.robot.name} points.\n\n
+      const choiceMsg = `${robotName} is setup to allow you to also send a(n) ${awardName} point when you send a ${robotName} point! \n
+There are three options how you can setup ${robotName} to do this:\n
+• Always send a(n) ${awardName} when you send a ${robotName} point.\n
+• Prompt every time to send a ${robotName} point to include a(n) ${awardName} point.\n
+• Never include a(n) ${awardName} point with ${robotName} points.\n\n
 
-How would you like to configure ${this.robot.name}? (You can always change this later by DMing me \`change my ${this.awardName} settings\`)\n
+How would you like to configure ${robotName}? (You can always change this later by DMing me \`change my ${awardName} settings\`)\n
 [ \`Always\` | \`Prompt\` | \`Never\` ]`;
-      this.robot.messageRoom(sender.slackId, choiceMsg);
+      robot.messageRoom(sender.slackId, choiceMsg);
       dialog.addChoice(/always/i, async () => {
-        await this.userService.setAwardCoResponse(
-          events.sender,
-          AwardCoResponse.ALWAYS,
-        );
-        this.sendAwards(events);
+        await us.setAwardCoResponse(events.sender, AwardCoResponse.ALWAYS);
+        PlusPlusMessageHandler.sendAwards(robot, events);
       });
       dialog.addChoice(/prompt/i, async () => {
-        await this.userService.setAwardCoResponse(
-          events.sender,
-          AwardCoResponse.PROMPT,
-        );
-        this.robot.messageRoom(
+        await us.setAwardCoResponse(events.sender, AwardCoResponse.PROMPT);
+        robot.messageRoom(
           events.sender.slackId,
-          `In that case, do you want to send ${eligibleRecipientsSlackTagString} a(n) ${this.awardName} worth ${events.amount}?\n[ \`Yes\` | \`No\` ]`,
+          `In that case, do you want to send ${eligibleRecipientsSlackTagString} a(n) ${awardName} worth ${events.amount}?\n[ \`Yes\` | \`No\` ]`,
         );
         dialog.addChoice(/yes/i, async () => {
-          this.sendAwards(events);
+          PlusPlusMessageHandler.sendAwards(robot, events);
         });
         dialog.addChoice(/no/i, async () => {
-          this.robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
+          robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
         });
       });
       dialog.addChoice(/never/i, async () => {
-        await this.userService.setAwardCoResponse(
-          sender,
-          AwardCoResponse.NEVER,
-        );
-        this.robot.messageRoom(
+        await us.setAwardCoResponse(sender, AwardCoResponse.NEVER);
+        robot.messageRoom(
           sender.slackId,
           'Alright! No worries. If you ever change your mind we can change your mind just let me know (DM me `change my awardCo settings`)!',
         );
@@ -137,25 +118,25 @@ How would you like to configure ${this.robot.name}? (You can always change this 
 
     switch (sender.awardCoResponse) {
       case AwardCoResponse.ALWAYS:
-        this.sendAwards(events);
+        PlusPlusMessageHandler.sendAwards(robot, events);
         break;
       case AwardCoResponse.PROMPT: {
         const dialog = switchBoard.startDialog(msg);
         dialog.dialogTimeout = () => {
-          this.robot.messageRoom(
+          robot.messageRoom(
             sender.slackId,
             "We didn't receive your response in time. Please try again.",
           );
         };
-        this.robot.messageRoom(
+        robot.messageRoom(
           sender.slackId,
-          `You just gave ${eligibleRecipientsSlackTagString} a ${this.robot.name} point and ${this.awardName} is enabled, would you like to send them ${firstEvent.amount} point(s) on ${this.awardName} as well?\n[ \`Yes\` | \`No\` ]`,
+          `You just gave ${eligibleRecipientsSlackTagString} a ${robotName} point and ${awardName} is enabled, would you like to send them ${firstEvent.amount} point(s) on ${awardName} as well?\n[ \`Yes\` | \`No\` ]`,
         );
         dialog.addChoice(/yes/i, async () => {
-          this.sendAwards(events);
+          PlusPlusMessageHandler.sendAwards(robot, events);
         });
         dialog.addChoice(/no/i, () => {
-          this.robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
+          robot.messageRoom(sender.slackId, 'Ah, alright. Next time!');
         });
         break;
       }
@@ -169,10 +150,11 @@ How would you like to configure ${this.robot.name}? (You can always change this 
    * helper to send a list of events
    * @private
    */
-  async sendAwards(events) {
-    const awardResponses = await this.awardCoService.sendAwards(events);
-    this.robot.emit('plus-plus-awardCo-sent', awardResponses);
+  static async sendAwards(robot, events) {
+    const awardResponses = await acs.sendAwards(robot, events);
+    robot.emit('plus-plus-awardCo-sent', awardResponses);
   }
 }
 
 module.exports = PlusPlusMessageHandler;
+module.exports.ppmh = PlusPlusMessageHandler;
