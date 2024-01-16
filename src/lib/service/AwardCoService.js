@@ -26,7 +26,7 @@ class AwardCoService {
       let note = awardCoDefaultNote;
       if (event.reason) {
         const buff = Buffer.from(event.reason, 'base64');
-        note = `${buff.toString('UTF-8')} (via ${robotName})`;
+        note = `${buff.toString('utf8')} (via ${robotName})`;
       }
 
       promises.push(

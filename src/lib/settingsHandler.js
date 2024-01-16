@@ -12,7 +12,7 @@ class SettingsHandler {
       return;
     }
 
-    const user = await us.getUser(msg.robot, msg.message.user.id);
+    const user = await us.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
         "I'm sorry we could not find your user account. Please contact an admin",
@@ -21,10 +21,17 @@ class SettingsHandler {
     }
 
     const dialog = switchBoard.startDialog(msg);
-    let choiceMsg = `${msg.robot.name} is setup to allow you to also send a(n) ${awardCoName} point when you send a ${msg.robot.name} point! `;
-    choiceMsg += `There are three options how you can setup ${msg.robot.name} to do this:`;
-    choiceMsg += `\n• Always send a(n) ${awardCoName} when you send a ${msg.robot.name} point.\n • Prompt every time to send a ${msg.robot.name} point to include a(n) ${awardCoName} point.\n • Never include a(n) ${awardCoName} point with ${msg.robot.name} points.`;
-    choiceMsg += `\n\nHow would you like to configure ${msg.robot.name}? (You can always change this later by DMing me \`change my ${awardCoName} settings\`)\n[ \`Always\` | \`Prompt\` | \`Never\` ]`;
+    const choiceMsg = `${msg.robot.name} is setup to allow you to also send a(n) ${awardCoName} point when you send a ${msg.robot.name} point!
+There are three options how you can setup ${msg.robot.name} to do this:
+
+• Always send a(n) ${awardCoName} when you send a ${msg.robot.name} point.
+• Prompt every time to send a ${msg.robot.name} point to include a(n) ${awardCoName} point.
+• Never include a(n) ${awardCoName} point with ${msg.robot.name} points.
+
+How would you like to configure ${msg.robot.name}? (You can always change this later by DMing me \`change my ${awardCoName} settings\`)
+
+[ \`Always\` | \`Prompt\` | \`Never\` ]`;
+
     msg.robot.messageRoom(user.slackId, choiceMsg);
     dialog.addChoice(/always/i, async () => {
       await us.setAwardCoResponse(user, AwardCoResponse.ALWAYS);
@@ -55,7 +62,7 @@ class SettingsHandler {
       return;
     }
 
-    const user = await us.getUser(msg.robot, msg.message.user.id);
+    const user = await us.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
         "I'm sorry we could not find your user account. Please contact an admin",
@@ -86,7 +93,7 @@ class SettingsHandler {
       return;
     }
 
-    let user = await us.getUser(msg.robot, msg.message.user.id);
+    let user = await us.getUser(msg.message.user.id);
     if (!user) {
       msg.reply(
         "I'm sorry we could not find your user account. Please contact an admin",
@@ -95,15 +102,12 @@ class SettingsHandler {
     }
 
     await us.toggleAwardCoDM(user);
-    user = await us.getUser(msg.robot, msg.message.user.id);
+    user = await us.getUser(msg.message.user.id);
+    const willOrWont = user.awardCoDM
+      ? `${msg.robot.name} will DM you again.`
+      : `${msg.robot.name} won't DM you any more.`;
     msg.reply(
-      `Thank you! We've updated your ${
-        msg.robot.name
-      }->${awardCoName} DM config. ${
-        user.awardCoDM
-          ? `${msg.robot.name} will DM you again.`
-          : `${msg.robot.name} won't DM you any more.`
-      }`,
+      `Thank you! We've updated your ${msg.robot.name}->${awardCoName} DM config. ${willOrWont}`,
     );
   }
 }

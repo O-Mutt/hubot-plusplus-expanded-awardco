@@ -11,7 +11,7 @@ class AwardCoMessageHandler {
         messages.push(
           `We sent a(n) ${awardCoName} to <@${ar.event.recipient.slackId}>.`,
         );
-        const user = await us.getUser(robot, ar.event.sender.slackId);
+        const user = await us.getUser(ar.event.sender.slackId);
         if (user.awardCoDM === true || user.awardCoDM === undefined) {
           let dm = `We sent <@${ar.event.recipient.slackId}> an award via ${awardCoName}.`;
           /* if ((!user.awardCoAmount || e.event.amount === 1) && Helpers.rngBoolean()) {
@@ -30,7 +30,15 @@ class AwardCoMessageHandler {
         );
       }
     });
-    awardResponses[0].event.msg.send(messages.join('\n'));
+
+    robot.emit('plus-plus-reaction', {
+      reactions: ['oktapreciate', 'bufo-offers-oktappreciate', 'hubot'],
+      silent: awardResponses[0].silent,
+      msg: awardResponses[0].event.msg,
+    });
+    if (!awardResponses[0].silent) {
+      awardResponses[0].event.msg.send(messages.join('\n'));
+    }
   }
 }
 

@@ -58,7 +58,7 @@ class PlusPlusMessageHandler {
     const eligibleRecipientsSlackTagString = `<@${eligibleRecipients
       .map((er) => er.slackId ?? er.name)
       .join('>, <@')}>`;
-    const { awardCoAmount = 1 } = await us.getUser(robot, sender.slackId);
+    const { awardCoAmount = 1 } = await us.getUser(sender.slackId);
     events.forEach((e) => {
       e.amount = awardCoAmount;
     });

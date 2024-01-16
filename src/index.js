@@ -16,6 +16,7 @@
 
 const H = require('./lib/helpers');
 const { ppmh } = require('./lib/plusPlusHandler');
+const { acmh } = require('./lib/awardCoSentHandler');
 const { sh } = require('./lib/settingsHandler');
 
 module.exports = (robot) => {
@@ -30,20 +31,18 @@ module.exports = (robot) => {
 
   robot.on('plus-plus', (...args) => ppmh.handlePlusPlus(robot, args));
   robot.on('plus-plus-awardCo-sent', (...args) =>
-    ppmh.handleAwardCoSent(robot, args),
+    acmh.handleAwardCoSent(robot, args),
   );
 
   const changeSettingsRegExp = new RegExp(
     `.*change.*${awardCoName}\\s?(?:integration)?\\s?(?:configuration|config|response|setting|settings).*`,
     'ig',
   );
-  robot.respond(changeSettingsRegExp, (msg) =>
-    sh.changeAwardCoConfig(robot, msg),
-  );
+  robot.respond(changeSettingsRegExp, sh.changeAwardCoConfig);
   // robot.respond(/.*change.*awardCo.*(points|amount).*/ig, changeAwardCoAmount);
   const dmSettingRegExp = new RegExp(
     `.*toggle dm about ${awardCoName}.*`,
     'ig',
   );
-  robot.respond(dmSettingRegExp, (msg) => sh.toggleAwardCoDM(robot, msg));
+  robot.respond(dmSettingRegExp, sh.toggleAwardCoDM);
 };
